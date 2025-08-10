@@ -29,6 +29,8 @@ from vinyl_preflight.utils.timefmt import seconds_to_mmss as _util_seconds_to_mm
 from vinyl_preflight.core.validator import detect_consolidated_mode as _detect_mode
 from vinyl_preflight.core.wav_utils import get_wav_duration as _get_wav_duration
 from vinyl_preflight.core.pdf_utils import extract_text_from_pdf as _extract_text_from_pdf
+from vinyl_preflight.io.output import write_csv
+
 
 
 logger = logging.getLogger(__name__)
@@ -281,6 +283,7 @@ class PreflightProcessor:
                         self.detailed_logger.log_extracted_data(pdf_path, result)
 
                 self.status_callback("5/5 Zahajuji finální validaci a zápis do reportu...")
+                # využijeme modulární CSV writer
                 with open(output_filename, 'w', newline='', encoding='utf-8') as f:
                     writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
                     writer.writeheader()
