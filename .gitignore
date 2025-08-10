@@ -1,88 +1,5 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS specific
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Project specific
-output/*.csv
-output/*.txt
-output/*.log
-output/*.json
-test_*.py
-temp/
-*.tmp
-
-# Test data (exclude sensitive test files)
-data-for-testing/
-test_data/
-
-# API keys and secrets
-.env.local
-.env.production
-secrets.json
-config.json
-
 # Logs
-logs/
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -90,8 +7,38 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Node.js (if any)
-node_modules/
-dist/
-dist-ssr/
+node_modules
+dist
+dist-ssr
 *.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+venv
+venv/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+*.egg-info/
+
+# Citlivá data
+.env
+
+# Výstupní data (volitelné, ale doporučené)
+output/*.json
+output/*.csv
+
+# IDE a systémové soubory
+.vscode/
+.idea/
+*.DS_Store

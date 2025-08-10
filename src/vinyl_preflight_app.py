@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""
-Vinyl Preflight Processor v2.5 - Finální Produkční Verze
 
-- Implementuje plnou podporu pro "Consolidated Side" mód (jeden WAV na stranu).
-- Automaticky detekuje mód projektu a volí správnou validační strategii.
-- Poskytuje přesné a relevantní reporty pro všechny typy projektů.
-"""
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import threading

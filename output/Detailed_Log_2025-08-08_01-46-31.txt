@@ -1,0 +1,810 @@
+================================================================================
+VINYL PREFLIGHT PROCESSOR - DETAILNÍ LOG
+================================================================================
+Spuštěno: 2025-08-08 01:46:31
+================================================================================
+
+
+[01:46:31] (+0.0s) 🚀 SPUŠTĚNÍ ZPRACOVÁNÍ
+------------------------------------------------------------
+{
+  "source_directory": "C:\\gz_projekt\\data-for-testing\\01",
+  "output_file": "C:\\gz_projekt\\vinyl-preflight\\output\\Preflight_Report_2025-08-08_01-46-31.csv",
+  "log_file": "C:\\gz_projekt\\vinyl-preflight\\output\\Detailed_Log_2025-08-08_01-46-31.txt"
+}
+
+
+[01:46:35] (+3.8s) 📁 NALEZENÉ PROJEKTY
+------------------------------------------------------------
+{
+  "80s-album-test-individual": {
+    "pdf_files": [
+      "vinyl-track-listing.pdf"
+    ],
+    "wav_files": [
+      "01_Company_B___Fascinated__Club_Mix__Side_A.wav",
+      "01_Violet_Eves___Fiesta__Rough_Mix_Tape_Version__Side_B.wav",
+      "02_Bianca___Watching_Me__Vocal_Version__Side_A.wav",
+      "02_Tina___Boom_Boom__7___Version__Side_B.wav",
+      "03_Banda_Aca___Jesahel__English_Version__Side_B.wav",
+      "03_On_The_Case_Featuring_Cousin_Rachel___Shikisha__Club_Mix_Version__Side_A.wav",
+      "04_Jules___You_Mean_Nothing_To_Me__7___Version__Side_B.wav",
+      "05_Rick_Valentino___Little_Lady_Blue__Compilation_Version__Side_B.wav"
+    ],
+    "pdf_count": 1,
+    "wav_count": 8
+  },
+  "Gein - Gein - Hell⁄Telepathy feat Bitfiendz": {
+    "pdf_files": [
+      "vinyl-track-listing.pdf"
+    ],
+    "wav_files": [
+      "01_1_Gein___Hell__2017_Remaster__Side_B.wav",
+      "01_2_Gein___Gein_feat__Bitfiendz___Telepathy__2017_Remaster__Side_A.wav"
+    ],
+    "pdf_count": 1,
+    "wav_count": 2
+  },
+  "progre-006": {
+    "pdf_files": [
+      "vinyl-track-listing.pdf"
+    ],
+    "wav_files": [
+      "Side_A_Master.wav",
+      "Side_B_Master.wav"
+    ],
+    "pdf_count": 1,
+    "wav_count": 2
+  },
+  "RecordPlant_7378_FINAL": {
+    "pdf_files": [
+      "tracklist.pdf"
+    ],
+    "wav_files": [
+      "SIDE-A-V2-WAV.wav",
+      "SIDE-B-V2-WAV.wav",
+      "SIDE-C-V2-WAV.wav"
+    ],
+    "pdf_count": 1,
+    "wav_count": 3
+  }
+}
+
+
+[01:46:37] (+6.0s) 🎵 DÉLKY WAV SOUBORŮ
+------------------------------------------------------------
+{
+  "01_Company_B___Fascinated__Club_Mix__Side_A.wav": "07:32 (452.00s)",
+  "01_Violet_Eves___Fiesta__Rough_Mix_Tape_Version__Side_B.wav": "04:00 (241.00s)",
+  "02_Bianca___Watching_Me__Vocal_Version__Side_A.wav": "07:15 (435.00s)",
+  "02_Tina___Boom_Boom__7___Version__Side_B.wav": "03:33 (213.67s)",
+  "03_Banda_Aca___Jesahel__English_Version__Side_B.wav": "04:40 (280.91s)",
+  "03_On_The_Case_Featuring_Cousin_Rachel___Shikisha__Club_Mix_Version__Side_A.wav": "06:01 (361.00s)",
+  "04_Jules___You_Mean_Nothing_To_Me__7___Version__Side_B.wav": "03:35 (215.12s)",
+  "05_Rick_Valentino___Little_Lady_Blue__Compilation_Version__Side_B.wav": "04:02 (242.80s)",
+  "01_1_Gein___Hell__2017_Remaster__Side_B.wav": "06:32 (392.73s)",
+  "01_2_Gein___Gein_feat__Bitfiendz___Telepathy__2017_Remaster__Side_A.wav": "06:24 (384.55s)",
+  "Side_A_Master.wav": "25:56 (1556.13s)",
+  "Side_B_Master.wav": "24:54 (1494.32s)",
+  "SIDE-A-V2-WAV.wav": "08:42 (522.01s)",
+  "SIDE-B-V2-WAV.wav": "09:55 (595.72s)",
+  "SIDE-C-V2-WAV.wav": "15:16 (916.63s)"
+}
+
+
+[01:46:37] (+6.0s) 📦 PDF DÁVKY
+------------------------------------------------------------
+{
+  "batch_1": [
+    "vinyl-track-listing.pdf",
+    "vinyl-track-listing.pdf",
+    "vinyl-track-listing.pdf",
+    "tracklist.pdf"
+  ]
+}
+
+
+[01:46:37] (+6.0s) 🤖 LLM REQUEST - DATA ODESLANÁ DO LLM
+------------------------------------------------------------
+{
+  "model": "google/gemini-2.5-flash",
+  "messages": null,
+  "temperature": null,
+  "max_tokens": null
+}
+
+
+[01:46:43] (+11.9s) 🤖 LLM RESPONSE - DATA PŘIJATÁ Z LLM
+------------------------------------------------------------
+{
+  "raw_response": {
+    "id": "gen-1754610398-RAY5bm7iKg5HtebWhjUn",
+    "provider": "Google",
+    "model": "google/gemini-2.5-flash",
+    "object": "chat.completion",
+    "created": 1754610398,
+    "choices": [
+      {
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "STOP",
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n  \"results\": [\n    {\n      \"source_identifier\": \"C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/80s-album-test-individual/vinyl-track-listing.pdf\",\n      \"status\": \"success\",\n      \"data\": [\n        {\n          \"side\": \"A\",\n          \"track_number\": 1,\n          \"title\": \"Company B - Fascinated (Club Mix)\",\n          \"duration_seconds\": 452\n        },\n        {\n          \"side\": \"A\",\n          \"track_number\": 2,\n          \"title\": \"Bianca - Watching Me (Vocal Version)\",\n          \"duration_seconds\": 435\n        },\n        {\n          \"side\": \"A\",\n          \"track_number\": 3,\n          \"title\": \"On The Case Featuring Cousin Rachel - Shikisha (Club Mix Version)\",\n          \"duration_seconds\": 361\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 1,\n          \"title\": \"Violet Eves - Fiesta (Rough Mix Tape Version)\",\n          \"duration_seconds\": 240\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 2,\n          \"title\": \"Tina - Boom Boom (7'' Version)\",\n          \"duration_seconds\": 213\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 3,\n          \"title\": \"Banda Aca - Jesahel (English Version)\",\n          \"duration_seconds\": 280\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 4,\n          \"title\": \"Jules - You Mean Nothing To Me (7'' Version)\",\n          \"duration_seconds\": 215\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 5,\n          \"title\": \"Rick Valentino - Little Lady Blue (Compilation Version)\",\n          \"duration_seconds\": 242\n        }\n      ]\n    },\n    {\n      \"source_identifier\": \"C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/Gein - Gein - Hell⁄Telepathy feat Bitfiendz/vinyl-track-listing.pdf\",\n      \"status\": \"success\",\n      \"data\": [\n        {\n          \"side\": \"A\",\n          \"track_number\": 1,\n          \"title\": \"2.Gein - Gein feat. Bitfiendz - Telepathy (2017 Remaster)\",\n          \"duration_seconds\": 384\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 1,\n          \"title\": \"1.Gein - Hell (2017 Remaster)\",\n          \"duration_seconds\": 392\n        }\n      ]\n    },\n    {\n      \"source_identifier\": \"C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/progre-006/vinyl-track-listing.pdf\",\n      \"status\": \"success\",\n      \"data\": [\n        {\n          \"side\": \"A\",\n          \"track_number\": 1,\n          \"title\": \"01-Mitrinique - Saturday (Eelke Kleijn 'Dark Matter' remix)\",\n          \"duration_seconds\": 527\n        },\n        {\n          \"side\": \"A\",\n          \"track_number\": 2,\n          \"title\": \"02-Beat Syndrome & Madloch - Waiting Game (Luis Junior remix)\",\n          \"duration_seconds\": 523\n        },\n        {\n          \"side\": \"A\",\n          \"track_number\": 3,\n          \"title\": \"03-Diego Poblets - Parallels & Meridians (Lank remix)\",\n          \"duration_seconds\": 503\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 1,\n          \"title\": \"04-Mitrinique - Earthbound (Overtone Watson remix)\",\n          \"duration_seconds\": 506\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 2,\n          \"title\": \"05-Noa Romana & Deersky - Metamorphosis (Scotty A remix)\",\n          \"duration_seconds\": 444\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 3,\n          \"title\": \"06-Yunta - Perpetuum (Dpen remix)\",\n          \"duration_seconds\": 540\n        }\n      ]\n    },\n    {\n      \"source_identifier\": \"C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/RecordPlant_7378_FINAL/tracklist.pdf\",\n      \"status\": \"success\",\n      \"data\": [\n        {\n          \"side\": \"A\",\n          \"track_number\": 1,\n          \"title\": \"24021783_an-epic_by_epicmasters_r8b\",\n          \"duration_seconds\": 164\n        },\n        {\n          \"side\": \"A\",\n          \"track_number\": 2,\n          \"title\": \"24030444_atmospheric-bright-indie-rock_by_vleet_r8b\",\n          \"duration_seconds\": 144\n        },\n        {\n          \"side\": \"A\",\n          \"track_number\": 3,\n          \"title\": \"23924241_arabian-nights_by_pantheonmusic_Main_r8b\",\n          \"duration_seconds\": 208\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 1,\n          \"title\": \"24252724_a-dance_by_blueeagleaudio_r8b\",\n          \"duration_seconds\": 129\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 2,\n          \"title\": \"A Moment to Reflect_r8b\",\n          \"duration_seconds\": 174\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 3,\n          \"title\": \"24205986_americana-indie-pop_by_jk_production007_Full_r8b\",\n          \"duration_seconds\": 122\n        },\n        {\n          \"side\": \"B\",\n          \"track_number\": 4,\n          \"title\": \"24211558_abstract-corporate_by_broadwaysound_r8b\",\n          \"duration_seconds\": 163\n        },\n        {\n          \"side\": \"C\",\n          \"track_number\": 1,\n          \"title\": \"Acoustic Peace_r8b\",\n          \"duration_seconds\": 242\n        },\n        {\n          \"side\": \"C\",\n          \"track_number\": 2,\n          \"title\": \"action-sport-rock_by_bearstockmusic_22862816_r8b\",\n          \"duration_seconds\": 400\n        },\n        {\n          \"side\": \"C\",\n          \"track_number\": 3,\n          \"title\": \"abstract-emotion-background_by_deepersound_16392016_r8b\",\n          \"duration_seconds\": 270\n        }\n      ]\n    }\n  ]\n}",
+          "refusal": null,
+          "reasoning": null
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1330,
+      "completion_tokens": 1810,
+      "total_tokens": 3140
+    }
+  },
+  "parsed_results": [
+    {
+      "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/80s-album-test-individual/vinyl-track-listing.pdf",
+      "status": "success",
+      "data": [
+        {
+          "side": "A",
+          "track_number": 1,
+          "title": "Company B - Fascinated (Club Mix)",
+          "duration_seconds": 452
+        },
+        {
+          "side": "A",
+          "track_number": 2,
+          "title": "Bianca - Watching Me (Vocal Version)",
+          "duration_seconds": 435
+        },
+        {
+          "side": "A",
+          "track_number": 3,
+          "title": "On The Case Featuring Cousin Rachel - Shikisha (Club Mix Version)",
+          "duration_seconds": 361
+        },
+        {
+          "side": "B",
+          "track_number": 1,
+          "title": "Violet Eves - Fiesta (Rough Mix Tape Version)",
+          "duration_seconds": 240
+        },
+        {
+          "side": "B",
+          "track_number": 2,
+          "title": "Tina - Boom Boom (7'' Version)",
+          "duration_seconds": 213
+        },
+        {
+          "side": "B",
+          "track_number": 3,
+          "title": "Banda Aca - Jesahel (English Version)",
+          "duration_seconds": 280
+        },
+        {
+          "side": "B",
+          "track_number": 4,
+          "title": "Jules - You Mean Nothing To Me (7'' Version)",
+          "duration_seconds": 215
+        },
+        {
+          "side": "B",
+          "track_number": 5,
+          "title": "Rick Valentino - Little Lady Blue (Compilation Version)",
+          "duration_seconds": 242
+        }
+      ]
+    },
+    {
+      "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/Gein - Gein - Hell⁄Telepathy feat Bitfiendz/vinyl-track-listing.pdf",
+      "status": "success",
+      "data": [
+        {
+          "side": "A",
+          "track_number": 1,
+          "title": "2.Gein - Gein feat. Bitfiendz - Telepathy (2017 Remaster)",
+          "duration_seconds": 384
+        },
+        {
+          "side": "B",
+          "track_number": 1,
+          "title": "1.Gein - Hell (2017 Remaster)",
+          "duration_seconds": 392
+        }
+      ]
+    },
+    {
+      "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/progre-006/vinyl-track-listing.pdf",
+      "status": "success",
+      "data": [
+        {
+          "side": "A",
+          "track_number": 1,
+          "title": "01-Mitrinique - Saturday (Eelke Kleijn 'Dark Matter' remix)",
+          "duration_seconds": 527
+        },
+        {
+          "side": "A",
+          "track_number": 2,
+          "title": "02-Beat Syndrome & Madloch - Waiting Game (Luis Junior remix)",
+          "duration_seconds": 523
+        },
+        {
+          "side": "A",
+          "track_number": 3,
+          "title": "03-Diego Poblets - Parallels & Meridians (Lank remix)",
+          "duration_seconds": 503
+        },
+        {
+          "side": "B",
+          "track_number": 1,
+          "title": "04-Mitrinique - Earthbound (Overtone Watson remix)",
+          "duration_seconds": 506
+        },
+        {
+          "side": "B",
+          "track_number": 2,
+          "title": "05-Noa Romana & Deersky - Metamorphosis (Scotty A remix)",
+          "duration_seconds": 444
+        },
+        {
+          "side": "B",
+          "track_number": 3,
+          "title": "06-Yunta - Perpetuum (Dpen remix)",
+          "duration_seconds": 540
+        }
+      ]
+    },
+    {
+      "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/RecordPlant_7378_FINAL/tracklist.pdf",
+      "status": "success",
+      "data": [
+        {
+          "side": "A",
+          "track_number": 1,
+          "title": "24021783_an-epic_by_epicmasters_r8b",
+          "duration_seconds": 164
+        },
+        {
+          "side": "A",
+          "track_number": 2,
+          "title": "24030444_atmospheric-bright-indie-rock_by_vleet_r8b",
+          "duration_seconds": 144
+        },
+        {
+          "side": "A",
+          "track_number": 3,
+          "title": "23924241_arabian-nights_by_pantheonmusic_Main_r8b",
+          "duration_seconds": 208
+        },
+        {
+          "side": "B",
+          "track_number": 1,
+          "title": "24252724_a-dance_by_blueeagleaudio_r8b",
+          "duration_seconds": 129
+        },
+        {
+          "side": "B",
+          "track_number": 2,
+          "title": "A Moment to Reflect_r8b",
+          "duration_seconds": 174
+        },
+        {
+          "side": "B",
+          "track_number": 3,
+          "title": "24205986_americana-indie-pop_by_jk_production007_Full_r8b",
+          "duration_seconds": 122
+        },
+        {
+          "side": "B",
+          "track_number": 4,
+          "title": "24211558_abstract-corporate_by_broadwaysound_r8b",
+          "duration_seconds": 163
+        },
+        {
+          "side": "C",
+          "track_number": 1,
+          "title": "Acoustic Peace_r8b",
+          "duration_seconds": 242
+        },
+        {
+          "side": "C",
+          "track_number": 2,
+          "title": "action-sport-rock_by_bearstockmusic_22862816_r8b",
+          "duration_seconds": 400
+        },
+        {
+          "side": "C",
+          "track_number": 3,
+          "title": "abstract-emotion-background_by_deepersound_16392016_r8b",
+          "duration_seconds": 270
+        }
+      ]
+    }
+  ],
+  "results_count": 4
+}
+
+
+[01:46:43] (+11.9s) 📄 EXTRAHOVANÁ DATA Z PDF: vinyl-track-listing.pdf
+------------------------------------------------------------
+{
+  "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/80s-album-test-individual/vinyl-track-listing.pdf",
+  "status": "success",
+  "data": [
+    {
+      "side": "A",
+      "track_number": 1,
+      "title": "Company B - Fascinated (Club Mix)",
+      "duration_seconds": 452
+    },
+    {
+      "side": "A",
+      "track_number": 2,
+      "title": "Bianca - Watching Me (Vocal Version)",
+      "duration_seconds": 435
+    },
+    {
+      "side": "A",
+      "track_number": 3,
+      "title": "On The Case Featuring Cousin Rachel - Shikisha (Club Mix Version)",
+      "duration_seconds": 361
+    },
+    {
+      "side": "B",
+      "track_number": 1,
+      "title": "Violet Eves - Fiesta (Rough Mix Tape Version)",
+      "duration_seconds": 240
+    },
+    {
+      "side": "B",
+      "track_number": 2,
+      "title": "Tina - Boom Boom (7'' Version)",
+      "duration_seconds": 213
+    },
+    {
+      "side": "B",
+      "track_number": 3,
+      "title": "Banda Aca - Jesahel (English Version)",
+      "duration_seconds": 280
+    },
+    {
+      "side": "B",
+      "track_number": 4,
+      "title": "Jules - You Mean Nothing To Me (7'' Version)",
+      "duration_seconds": 215
+    },
+    {
+      "side": "B",
+      "track_number": 5,
+      "title": "Rick Valentino - Little Lady Blue (Compilation Version)",
+      "duration_seconds": 242
+    }
+  ]
+}
+
+
+[01:46:43] (+11.9s) 📄 EXTRAHOVANÁ DATA Z PDF: vinyl-track-listing.pdf
+------------------------------------------------------------
+{
+  "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/Gein - Gein - Hell⁄Telepathy feat Bitfiendz/vinyl-track-listing.pdf",
+  "status": "success",
+  "data": [
+    {
+      "side": "A",
+      "track_number": 1,
+      "title": "2.Gein - Gein feat. Bitfiendz - Telepathy (2017 Remaster)",
+      "duration_seconds": 384
+    },
+    {
+      "side": "B",
+      "track_number": 1,
+      "title": "1.Gein - Hell (2017 Remaster)",
+      "duration_seconds": 392
+    }
+  ]
+}
+
+
+[01:46:43] (+11.9s) 📄 EXTRAHOVANÁ DATA Z PDF: vinyl-track-listing.pdf
+------------------------------------------------------------
+{
+  "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/progre-006/vinyl-track-listing.pdf",
+  "status": "success",
+  "data": [
+    {
+      "side": "A",
+      "track_number": 1,
+      "title": "01-Mitrinique - Saturday (Eelke Kleijn 'Dark Matter' remix)",
+      "duration_seconds": 527
+    },
+    {
+      "side": "A",
+      "track_number": 2,
+      "title": "02-Beat Syndrome & Madloch - Waiting Game (Luis Junior remix)",
+      "duration_seconds": 523
+    },
+    {
+      "side": "A",
+      "track_number": 3,
+      "title": "03-Diego Poblets - Parallels & Meridians (Lank remix)",
+      "duration_seconds": 503
+    },
+    {
+      "side": "B",
+      "track_number": 1,
+      "title": "04-Mitrinique - Earthbound (Overtone Watson remix)",
+      "duration_seconds": 506
+    },
+    {
+      "side": "B",
+      "track_number": 2,
+      "title": "05-Noa Romana & Deersky - Metamorphosis (Scotty A remix)",
+      "duration_seconds": 444
+    },
+    {
+      "side": "B",
+      "track_number": 3,
+      "title": "06-Yunta - Perpetuum (Dpen remix)",
+      "duration_seconds": 540
+    }
+  ]
+}
+
+
+[01:46:43] (+11.9s) 📄 EXTRAHOVANÁ DATA Z PDF: tracklist.pdf
+------------------------------------------------------------
+{
+  "source_identifier": "C:/Users/marti/AppData/Local/Temp/preflight_j85160lq/RecordPlant_7378_FINAL/tracklist.pdf",
+  "status": "success",
+  "data": [
+    {
+      "side": "A",
+      "track_number": 1,
+      "title": "24021783_an-epic_by_epicmasters_r8b",
+      "duration_seconds": 164
+    },
+    {
+      "side": "A",
+      "track_number": 2,
+      "title": "24030444_atmospheric-bright-indie-rock_by_vleet_r8b",
+      "duration_seconds": 144
+    },
+    {
+      "side": "A",
+      "track_number": 3,
+      "title": "23924241_arabian-nights_by_pantheonmusic_Main_r8b",
+      "duration_seconds": 208
+    },
+    {
+      "side": "B",
+      "track_number": 1,
+      "title": "24252724_a-dance_by_blueeagleaudio_r8b",
+      "duration_seconds": 129
+    },
+    {
+      "side": "B",
+      "track_number": 2,
+      "title": "A Moment to Reflect_r8b",
+      "duration_seconds": 174
+    },
+    {
+      "side": "B",
+      "track_number": 3,
+      "title": "24205986_americana-indie-pop_by_jk_production007_Full_r8b",
+      "duration_seconds": 122
+    },
+    {
+      "side": "B",
+      "track_number": 4,
+      "title": "24211558_abstract-corporate_by_broadwaysound_r8b",
+      "duration_seconds": 163
+    },
+    {
+      "side": "C",
+      "track_number": 1,
+      "title": "Acoustic Peace_r8b",
+      "duration_seconds": 242
+    },
+    {
+      "side": "C",
+      "track_number": 2,
+      "title": "action-sport-rock_by_bearstockmusic_22862816_r8b",
+      "duration_seconds": 400
+    },
+    {
+      "side": "C",
+      "track_number": 3,
+      "title": "abstract-emotion-background_by_deepersound_16392016_r8b",
+      "duration_seconds": 270
+    }
+  ]
+}
+
+
+[01:46:43] (+12.0s) ✅ VALIDACE PROJEKTU: 80s-album-test-individual
+------------------------------------------------------------
+{
+  "project_name": "80s-album-test-individual",
+  "pdf_results_count": 1,
+  "wav_durations_count": 8,
+  "detected_mode": "INDIVIDUAL",
+  "validation_rows": [
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "Company B - Fascinated (Club Mix)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "07:32",
+      "wav_duration_mmss": "07:32",
+      "difference_mmss": "+00:00",
+      "pdf_duration_sec": 452,
+      "wav_duration_sec": 452.0,
+      "difference_sec": 0.0,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "01_Company_B___Fascinated__Club_Mix__Side_A.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "Bianca - Watching Me (Vocal Version)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "07:15",
+      "wav_duration_mmss": "07:15",
+      "difference_mmss": "+00:00",
+      "pdf_duration_sec": 435,
+      "wav_duration_sec": 435.0,
+      "difference_sec": 0.0,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "02_Bianca___Watching_Me__Vocal_Version__Side_A.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "On The Case Featuring Cousin Rachel - Shikisha (Club Mix Version)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "06:01",
+      "wav_duration_mmss": "06:01",
+      "difference_mmss": "+00:00",
+      "pdf_duration_sec": 361,
+      "wav_duration_sec": 361.0,
+      "difference_sec": 0.0,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "03_On_The_Case_Featuring_Cousin_Rachel___Shikisha__Club_Mix_Version__Side_A.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "Violet Eves - Fiesta (Rough Mix Tape Version)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "04:00",
+      "wav_duration_mmss": "04:01",
+      "difference_mmss": "+00:01",
+      "pdf_duration_sec": 240,
+      "wav_duration_sec": 241.0,
+      "difference_sec": 1.0,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "01_Violet_Eves___Fiesta__Rough_Mix_Tape_Version__Side_B.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "Tina - Boom Boom (7'' Version)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "03:33",
+      "wav_duration_mmss": "03:34",
+      "difference_mmss": "+00:01",
+      "pdf_duration_sec": 213,
+      "wav_duration_sec": 213.67,
+      "difference_sec": 0.67,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "02_Tina___Boom_Boom__7___Version__Side_B.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "Banda Aca - Jesahel (English Version)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "04:40",
+      "wav_duration_mmss": "04:41",
+      "difference_mmss": "+00:01",
+      "pdf_duration_sec": 280,
+      "wav_duration_sec": 280.91,
+      "difference_sec": 0.91,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "03_Banda_Aca___Jesahel__English_Version__Side_B.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "Jules - You Mean Nothing To Me (7'' Version)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "03:35",
+      "wav_duration_mmss": "03:35",
+      "difference_mmss": "+00:00",
+      "pdf_duration_sec": 215,
+      "wav_duration_sec": 215.12,
+      "difference_sec": 0.12,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "04_Jules___You_Mean_Nothing_To_Me__7___Version__Side_B.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "80s-album-test-individual",
+      "status": "OK",
+      "validation_item": "Rick Valentino - Little Lady Blue (Compilation Version)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "04:02",
+      "wav_duration_mmss": "04:03",
+      "difference_mmss": "+00:01",
+      "pdf_duration_sec": 242,
+      "wav_duration_sec": 242.8,
+      "difference_sec": 0.8,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "05_Rick_Valentino___Little_Lady_Blue__Compilation_Version__Side_B.wav",
+      "notes": ""
+    }
+  ]
+}
+
+
+[01:46:43] (+12.0s) ✅ VALIDACE PROJEKTU: Gein - Gein - Hell⁄Telepathy feat Bitfiendz
+------------------------------------------------------------
+{
+  "project_name": "Gein - Gein - Hell⁄Telepathy feat Bitfiendz",
+  "pdf_results_count": 1,
+  "wav_durations_count": 2,
+  "detected_mode": "INDIVIDUAL",
+  "validation_rows": [
+    {
+      "project_title": "Gein - Gein - Hell⁄Telepathy feat Bitfiendz",
+      "status": "OK",
+      "validation_item": "2.Gein - Gein feat. Bitfiendz - Telepathy (2017 Remaster)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "06:24",
+      "wav_duration_mmss": "06:25",
+      "difference_mmss": "+00:01",
+      "pdf_duration_sec": 384,
+      "wav_duration_sec": 384.55,
+      "difference_sec": 0.55,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "01_2_Gein___Gein_feat__Bitfiendz___Telepathy__2017_Remaster__Side_A.wav",
+      "notes": ""
+    },
+    {
+      "project_title": "Gein - Gein - Hell⁄Telepathy feat Bitfiendz",
+      "status": "OK",
+      "validation_item": "1.Gein - Hell (2017 Remaster)",
+      "item_type": "TRACK",
+      "pdf_duration_mmss": "06:32",
+      "wav_duration_mmss": "06:33",
+      "difference_mmss": "+00:01",
+      "pdf_duration_sec": 392,
+      "wav_duration_sec": 392.73,
+      "difference_sec": 0.73,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "01_1_Gein___Hell__2017_Remaster__Side_B.wav",
+      "notes": ""
+    }
+  ]
+}
+
+
+[01:46:43] (+12.0s) ✅ VALIDACE PROJEKTU: progre-006
+------------------------------------------------------------
+{
+  "project_name": "progre-006",
+  "pdf_results_count": 1,
+  "wav_durations_count": 2,
+  "detected_mode": "CONSOLIDATED",
+  "validation_rows": [
+    {
+      "project_title": "progre-006",
+      "status": "OK",
+      "validation_item": "Side A",
+      "item_type": "SIDE",
+      "pdf_duration_mmss": "25:53",
+      "wav_duration_mmss": "25:56",
+      "difference_mmss": "+00:03",
+      "pdf_duration_sec": 1553,
+      "wav_duration_sec": 1556.13,
+      "difference_sec": 3.13,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "Side_A_Master.wav",
+      "notes": "Celkem 3 skladeb."
+    },
+    {
+      "project_title": "progre-006",
+      "status": "OK",
+      "validation_item": "Side B",
+      "item_type": "SIDE",
+      "pdf_duration_mmss": "24:50",
+      "wav_duration_mmss": "24:54",
+      "difference_mmss": "+00:04",
+      "pdf_duration_sec": 1490,
+      "wav_duration_sec": 1494.32,
+      "difference_sec": 4.32,
+      "pdf_source": "vinyl-track-listing.pdf",
+      "wav_source": "Side_B_Master.wav",
+      "notes": "Celkem 3 skladeb."
+    }
+  ]
+}
+
+
+[01:46:43] (+12.0s) ✅ VALIDACE PROJEKTU: RecordPlant_7378_FINAL
+------------------------------------------------------------
+{
+  "project_name": "RecordPlant_7378_FINAL",
+  "pdf_results_count": 1,
+  "wav_durations_count": 3,
+  "detected_mode": "CONSOLIDATED",
+  "validation_rows": [
+    {
+      "project_title": "RecordPlant_7378_FINAL",
+      "status": "OK",
+      "validation_item": "Side A",
+      "item_type": "SIDE",
+      "pdf_duration_mmss": "08:36",
+      "wav_duration_mmss": "08:42",
+      "difference_mmss": "+00:06",
+      "pdf_duration_sec": 516,
+      "wav_duration_sec": 522.01,
+      "difference_sec": 6.01,
+      "pdf_source": "tracklist.pdf",
+      "wav_source": "SIDE-A-V2-WAV.wav",
+      "notes": "Celkem 3 skladeb."
+    },
+    {
+      "project_title": "RecordPlant_7378_FINAL",
+      "status": "OK",
+      "validation_item": "Side B",
+      "item_type": "SIDE",
+      "pdf_duration_mmss": "09:48",
+      "wav_duration_mmss": "09:56",
+      "difference_mmss": "+00:08",
+      "pdf_duration_sec": 588,
+      "wav_duration_sec": 595.72,
+      "difference_sec": 7.72,
+      "pdf_source": "tracklist.pdf",
+      "wav_source": "SIDE-B-V2-WAV.wav",
+      "notes": "Celkem 4 skladeb."
+    },
+    {
+      "project_title": "RecordPlant_7378_FINAL",
+      "status": "OK",
+      "validation_item": "Side C",
+      "item_type": "SIDE",
+      "pdf_duration_mmss": "15:12",
+      "wav_duration_mmss": "15:17",
+      "difference_mmss": "+00:05",
+      "pdf_duration_sec": 912,
+      "wav_duration_sec": 916.63,
+      "difference_sec": 4.63,
+      "pdf_source": "tracklist.pdf",
+      "wav_source": "SIDE-C-V2-WAV.wav",
+      "notes": "Celkem 3 skladeb."
+    }
+  ]
+}
+
+
+[01:46:43] (+12.2s) 🏁 DOKONČENÍ ZPRACOVÁNÍ
+------------------------------------------------------------
+{
+  "total_time_seconds": 12.178540229797363,
+  "output_csv_file": "C:\\gz_projekt\\vinyl-preflight\\output\\Preflight_Report_2025-08-08_01-46-31.csv",
+  "log_file": "C:\\gz_projekt\\vinyl-preflight\\output\\Detailed_Log_2025-08-08_01-46-31.txt",
+  "projects_processed": 4,
+  "success": true
+}
+
