@@ -108,32 +108,38 @@ class TestConsolidatedModeDetection:
     
     def test_empty_wav_list(self, processor):
         """Test prázdného seznamu WAV"""
-        assert processor._detect_consolidated_mode([]) == False
-    
+        from vinyl_preflight.core.validator import detect_consolidated_mode
+        assert detect_consolidated_mode([]) == False
+
     def test_too_many_wavs(self, processor):
         """Test příliš mnoha WAV souborů (>4)"""
+        from vinyl_preflight.core.validator import detect_consolidated_mode
         wavs = [f"track_{i:02d}.wav" for i in range(1, 6)]
-        assert processor._detect_consolidated_mode(wavs) == False
-    
+        assert detect_consolidated_mode(wavs) == False
+
     def test_individual_tracks(self, processor):
         """Test individual track patterns"""
+        from vinyl_preflight.core.validator import detect_consolidated_mode
         wavs = ["01_track.wav", "02_track.wav", "03_track.wav"]
-        assert processor._detect_consolidated_mode(wavs) == False
-    
+        assert detect_consolidated_mode(wavs) == False
+
     def test_consolidated_sides(self, processor):
         """Test consolidated side patterns"""
+        from vinyl_preflight.core.validator import detect_consolidated_mode
         wavs = ["SIDE A-V2-WAV.wav", "SIDE B-V2-WAV.wav", "SIDE C-V2-WAV.wav"]
-        assert processor._detect_consolidated_mode(wavs) == True
-    
+        assert detect_consolidated_mode(wavs) == True
+
     def test_simple_sides(self, processor):
         """Test jednoduchých side patterns"""
+        from vinyl_preflight.core.validator import detect_consolidated_mode
         wavs = ["A.wav", "B.wav"]
-        assert processor._detect_consolidated_mode(wavs) == True
-    
+        assert detect_consolidated_mode(wavs) == True
+
     def test_mixed_patterns(self, processor):
         """Test smíšených patterns (většina individual)"""
+        from vinyl_preflight.core.validator import detect_consolidated_mode
         wavs = ["01_track.wav", "02_track.wav", "side_a.wav"]
-        assert processor._detect_consolidated_mode(wavs) == False
+        assert detect_consolidated_mode(wavs) == False
 
 
 class TestWAVProcessing:
