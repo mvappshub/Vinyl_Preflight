@@ -260,7 +260,19 @@ class PreflightProcessor:
 
                 self.status_callback(f"4/5 Budu zpracovávat {len(pdf_batches)} dávek PDF. Odesílám k LLM...")
                 from vinyl_preflight.core.extraction import process_all_pdf_batches
-                extracted_pdf_data = process_all_pdf_batches(pdf_batches, self.status_callback, self.progress_callback)
+                from vinyl_preflight.llm.client import OpenRouterLLMClient
+                from vinyl_preflight.llm.service import LLMExtractionService
+
+                # Vytvoření LLM klienta a service
+                llm_client = OpenRouterLLMClient(
+                    api_url=API_URL,
+                    headers=self.headers,
+                    model=MODEL_NAME,
+                    timeout=API_REQUEST_TIMEOUT
+                )
+                llm_service = LLMExtractionService(llm_client, self.detailed_logger)
+
+                extracted_pdf_data = process_all_pdf_batches(pdf_batches, llm_service, self.status_callback, self.progress_callback)
 
                 # Detailní výpis výsledků extrakce
                 self.status_callback(f"EXTRAKCE DOKONČENA - VÝSLEDKY PRO {len(extracted_pdf_data)} PDF:")
@@ -517,84 +529,7 @@ class PreflightProcessor:
                     logger.error(f"Chyba při zpracování dávky: {e}")
         return all_results
 
-    def _process_single_extraction_batch(self, batch: List[Path]) -> Optional[List[Dict]]:
-        documents_to_process = []
-        for pdf_path in batch:
-            try:
-                if not pdf_path.exists():
-                    logger.error(f"PDF file does not exist: {pdf_path}")
-                    documents_to_process.append({"identifier": pdf_path.as_posix(), "content": "CHYBA: Soubor neexistuje."})
-                    continue
 
-                if pdf_path.stat().st_size == 0:
-                    logger.error(f"PDF file is empty: {pdf_path.name}")
-                    documents_to_process.append({"identifier": pdf_path.as_posix(), "content": "CHYBA: Prázdný soubor."})
-                    continue
-
-                text = _extract_text_from_pdf(pdf_path)
-                if not text.strip():
-                    text = f"VAROVÁNÍ: PDF soubor '{pdf_path.name}' neobsahuje žádný extrahovatelný text."
-
-                documents_to_process.append({"identifier": pdf_path.as_posix(), "content": text})
-
-            except fitz.FileDataError as e:
-                logger.error(f"Corrupted PDF file: {pdf_path.name}, {e}")
-                documents_to_process.append({"identifier": pdf_path.as_posix(), "content": f"CHYBA: Poškozený PDF soubor. {e}"})
-            except (OSError, PermissionError) as e:
-                logger.error(f"Cannot access PDF file: {pdf_path.name}, {e}")
-                documents_to_process.append({"identifier": pdf_path.as_posix(), "content": f"CHYBA: Nelze přistoupit k souboru. {e}"})
-            except Exception as e:
-                logger.error(f"Unexpected error reading PDF: {pdf_path.name}, {e}")
-                documents_to_process.append({"identifier": pdf_path.as_posix(), "content": f"CHYBA: Neočekávaná chyba. {e}"})
-
-        if not documents_to_process: return None
-
-        prompt = f"""
-Jsi expert na hudební mastering. Tvým úkolem je precizně extrahovat informace o skladbách z několika dokumentů.
-Analyzuj KAŽDÝ dokument v poli a vrať VÝHRADNĚ JEDEN JSON objekt s klíčem "results". Hodnota klíče "results" bude pole, kde každý prvek reprezentuje jeden zpracovaný dokument.
-
-Struktura pro každý prvek v poli "results":
-- "source_identifier": Unikátní identifikátor dokumentu.
-- "status": 'success' nebo 'error'.
-- "data": Pokud 'success', zde bude pole skladeb. Každá skladba musí obsahovat "side", "track_number", "title", "duration_seconds".
-- "error_message": Popis chyby, pokud status je 'error'.
-
-Zde jsou dokumenty ke zpracování:
----
-{json.dumps(documents_to_process, indent=2, ensure_ascii=False)}
----
-"""
-        payload = { "model": MODEL_NAME, "messages": [{"role": "user", "content": prompt}], "response_format": {"type": "json_object"}, "temperature": 0.0 }
-
-        # Logování LLM požadavku
-        if self.detailed_logger:
-            self.detailed_logger.log_llm_request({
-                "model": MODEL_NAME,
-                "documents_count": len(documents_to_process),
-                "documents": [{"identifier": d["identifier"], "content_length": len(d["content"])} for d in documents_to_process],
-                "prompt_length": len(prompt),
-                "full_payload": payload
-            })
-
-        try:
-            response = requests.post(API_URL, headers=self.headers, json=payload, timeout=API_REQUEST_TIMEOUT)
-            response.raise_for_status()
-            response_json = response.json()
-            content_str = response_json["choices"][0]["message"]["content"]
-            parsed_results = json.loads(content_str).get("results", [])
-
-            # Logování LLM odpovědi
-            if self.detailed_logger:
-                self.detailed_logger.log_llm_response({
-                    "raw_response": response_json,
-                    "parsed_results": parsed_results,
-                    "results_count": len(parsed_results)
-                })
-
-            return parsed_results
-        except Exception as e:
-            logger.error(f"Chyba API volání pro dávku: {e}")
-            return [{"source_identifier": d["identifier"], "status": "error", "data": [], "error_message": str(e)} for d in documents_to_process]
 
     def _validate_project(self, project_name: str, pdf_results: Dict[str, Dict], wav_durations: Dict[str, Optional[float]]) -> List[Dict]:
         """
