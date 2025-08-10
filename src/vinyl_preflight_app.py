@@ -241,7 +241,8 @@ class PreflightProcessor:
                 self.detailed_logger.log_wav_durations(wav_durations)
 
                 self.status_callback("4/5 Vytvářím dávky PDF pro efektivní extrakci...")
-                pdf_batches = self._create_pdf_batches(projects)
+                from vinyl_preflight.core.pipeline import create_pdf_batches
+                pdf_batches = create_pdf_batches(projects)
 
                 # Detailní výpis PDF dávek
                 self.status_callback(f"VYTVOŘENO {len(pdf_batches)} DÁVEK PDF:")
