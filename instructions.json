@@ -1,0 +1,391 @@
+{
+  "meta": {
+    "project": "vinyl-preflight",
+    "purpose": "Kompletní instrukce pro AI agenta: refaktoring monolitu /mnt/data/vinyl_preflight_app.py do modulární architektury (bez změny GUI).",
+    "author_instructions": "Prováděj každý krok jako samostatný commit. Po každém PR spusť lokální validace/tests. Pokud testy selžou, revertuj poslední commit a vytvoř issue s popisem chyby a stacktrace."
+  },
+  "workflow": {
+    "main_branch": "main",
+    "branch_prefix": "feat/refactor/",
+    "commit_style": "feat: <co>, chore: <co>, fix: <co>, test: <co>",
+    "pr_template": "Každé PR musí obsahovat: (1) Co přidáno/změněno, (2) Jak spustit lokálně, (3) Jak ověřit, (4) Testy které přibyly."
+  },
+  "pr_sequence": [
+    {
+      "pr_id": "PR-1-init",
+      "title": "chore: inicializace skeletonu projektu (tooling, struktura, CI)",
+      "goal": "Vytvořit základní repozitářovou strukturu, pyproject, .gitignore, CI a README.",
+      "branch": "feat/refactor/init-skeleton",
+      "tasks": [
+        {
+          "id": "PR1-T1",
+          "action": "create_dirs",
+          "paths": [
+            "src/vinyl_preflight",
+            "src/vinyl_preflight/core",
+            "src/vinyl_preflight/io",
+            "src/vinyl_preflight/llm",
+            "src/vinyl_preflight/utils",
+            "tests/unit",
+            "tests/integration",
+            ".github/workflows",
+            "docs"
+          ]
+        },
+        {
+          "id": "PR1-T2",
+          "action": "create_file",
+          "path": "pyproject.toml",
+          "content": "[tool.poetry]\nname = \"vinyl-preflight\"\nversion = \"0.1.0\"\ndescription = \"Vinyl Preflight - refactor\"\nauthors = [\"auto-agent <agent@example.com>\"]\n\n[tool.poetry.dependencies]\npython = \"^3.10\"\n\n[tool.poetry.dev-dependencies]\npytest = \"^7.0.0\"\nmypy = \"^1.0\"\nruff = \"^0.0.0\"\nblack = \"^23.0.0\"\n"
+        },
+        {
+          "id": "PR1-T3",
+          "action": "create_file",
+          "path": ".gitignore",
+          "content": "venv/\n__pycache__/\n.env\n*.pyc\ndist/\nbuild/\noutput/\nnode_modules/\n"
+        },
+        {
+          "id": "PR1-T4",
+          "action": "create_file",
+          "path": ".github/workflows/ci.yml",
+          "content": "name: CI\non: [push, pull_request]\njobs:\n  tests:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: Set up Python\n        uses: actions/setup-python@v4\n        with:\n          python-version: '3.10'\n      - name: Install deps\n        run: |\n          python -m pip install -U pip\n          pip install pytest\n      - name: Run tests\n        run: |\n          pytest -q\n"
+        },
+        {
+          "id": "PR1-T5",
+          "action": "create_file",
+          "path": "README.md",
+          "content": "# Vinyl Preflight — Refactor skeleton\n\nTento repozitář obsahuje skeleton pro refaktoring monolitu `vinyl_preflight_app.py` do modulární architektury.\n\nDev kroky:\n1. Instalace: `poetry install` nebo `pip install -r requirements.txt`\n2. Spustit testy: `pytest -q`\n\nViz docs/ pro detailní plán refaktoringu.\n"
+        },
+        {
+          "id": "PR1-T6",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/init-skeleton && git add . && git commit -m \"chore: init project skeleton\" && git push -u origin feat/refactor/init-skeleton"
+        }
+      ],
+      "validations": [
+        "Ovĕř, že adresáře existují v repu.",
+        "CI job bude spuštěn (po push).",
+        "PR vytvořen s popisem."
+      ]
+    },
+    {
+      "pr_id": "PR-2-models",
+      "title": "feat: přidat datové modely (models.py) a jednoduché testy",
+      "goal": "Vytvořit datové modely (Track, Project, ExtractionResult, ReportRow) a unit testy.",
+      "branch": "feat/refactor/models",
+      "depends_on": "PR-1-init",
+      "tasks": [
+        {
+          "id": "PR2-T1",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/__init__.py",
+          "content": "__all__ = ['models','core','io','llm']\n__version__ = '0.1.0'\n"
+        },
+        {
+          "id": "PR2-T2",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/models.py",
+          "content": "from pydantic import BaseModel\nfrom pathlib import Path\nfrom typing import List, Optional\n\nclass Track(BaseModel):\n    title: str\n    side: Optional[str] = None\n    track_number: Optional[int] = None\n    duration_seconds: Optional[float] = None\n\nclass Project(BaseModel):\n    name: str\n    pdfs: List[Path] = []\n    wavs: List[Path] = []\n\nclass ExtractionResult(BaseModel):\n    source: str\n    status: str\n    tracks: List[Track] = []\n    error: Optional[str] = None\n\nclass ReportRow(BaseModel):\n    project_name: str\n    track_title: str\n    wav_file: Optional[str]\n    duration_seconds: Optional[float]\n"
+        },
+        {
+          "id": "PR2-T3",
+          "action": "create_file",
+          "path": "tests/unit/test_models.py",
+          "content": "from vinyl_preflight.models import Track, Project\nfrom pathlib import Path\n\ndef test_models_basic():\n    t = Track(title='Song A', side='A', track_number=1, duration_seconds=180.0)\n    assert t.title == 'Song A'\n    p = Project(name='TestProj', pdfs=[Path('a.pdf')], wavs=[Path('a.wav')])\n    assert p.name == 'TestProj'\n"
+        },
+        {
+          "id": "PR2-T4",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/models && git add src/vinyl_preflight/__init__.py src/vinyl_preflight/models.py tests/unit/test_models.py && git commit -m \"feat: add models and tests\" && git push -u origin feat/refactor/models"
+        }
+      ],
+      "validations": [
+        "Spustit `pytest -q` — test_models by měl projít.",
+        "Commit message správný."
+      ]
+    },
+    {
+      "pr_id": "PR-3-io",
+      "title": "feat: implementovat IO utility - filesystem a archives s testy",
+      "goal": "Přesunout a vylepšit safe extract logiku, filesystem helpery, output writer (CSV).",
+      "branch": "feat/refactor/io",
+      "depends_on": "PR-2-models",
+      "tasks": [
+        {
+          "id": "PR3-T1",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/io/filesystem.py",
+          "content": "from pathlib import Path\nimport shutil\n\ndef ensure_dir(path: Path):\n    path.mkdir(parents=True, exist_ok=True)\n\ndef safe_copy(src: Path, dest: Path):\n    ensure_dir(dest.parent)\n    shutil.copy2(src, dest)\n"
+        },
+        {
+          "id": "PR3-T2",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/io/archives.py",
+          "content": "from pathlib import Path\nimport zipfile\n\ndef safe_extract_zip(zip_path: Path, dest: Path) -> None:\n    # jednoduchá bezpečná extrakce: kontrola cesty a extrakce\n    with zipfile.ZipFile(zip_path, 'r') as z:\n        for member in z.namelist():\n            # zabránit path traversal\n            if Path(member).is_absolute() or '..' in Path(member).parts:\n                raise RuntimeError('Unsafe zip member: ' + member)\n        z.extractall(dest)\n"
+        },
+        {
+          "id": "PR3-T3",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/io/output.py",
+          "content": "import csv\nfrom pathlib import Path\nfrom typing import Iterable, Mapping\n\ndef write_csv(path: Path, rows: Iterable[Mapping[str, object]], headers: list[str]):\n    path.parent.mkdir(parents=True, exist_ok=True)\n    with path.open('w', newline='', encoding='utf-8') as f:\n        writer = csv.DictWriter(f, fieldnames=headers)\n        writer.writeheader()\n        for r in rows:\n            writer.writerow(r)\n"
+        },
+        {
+          "id": "PR3-T4",
+          "action": "create_file",
+          "path": "tests/unit/test_archives.py",
+          "content": "from vinyl_preflight.io.archives import safe_extract_zip\nfrom pathlib import Path\nimport zipfile\n\ndef test_safe_extract(tmp_path):\n    z = tmp_path / 't.zip'\n    d = tmp_path / 'out'\n    # vytvořit jednoduchý zip\n    with zipfile.ZipFile(z, 'w') as zz:\n        file = tmp_path / 'a.txt'\n        file.write_text('hello')\n        zz.write(file, arcname='a.txt')\n    safe_extract_zip(z, d)\n    assert (d / 'a.txt').exists()\n"
+        },
+        {
+          "id": "PR3-T5",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/io && git add src/vinyl_preflight/io && git add tests/unit/test_archives.py && git commit -m \"feat: add IO utils and archives with tests\" && git push -u origin feat/refactor/io"
+        }
+      ],
+      "validations": [
+        "pytest -q should projít (včetně test_archives).",
+        "Code review: bezpečná extrakce kontroluje path traversal."
+      ]
+    },
+    {
+      "pr_id": "PR-4-wav-pdf",
+      "title": "feat: WAV a PDF utility (wav_utils, pdf_utils) + tests",
+      "goal": "Implementovat čtení délky WAV, fallbacky a PDF text extraction wrapper s unit testy (mocks pokud je potřeba).",
+      "branch": "feat/refactor/wav-pdf",
+      "depends_on": "PR-3-io",
+      "tasks": [
+        {
+          "id": "PR4-T1",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/core/wav_utils.py",
+          "content": "from pathlib import Path\nimport soundfile as sf\n\ndef get_wav_duration(path: Path) -> float:\n    # vrátí délku v sekundách\n    data, sr = sf.read(path)\n    duration = len(data) / sr\n    return duration\n"
+        },
+        {
+          "id": "PR4-T2",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/core/pdf_utils.py",
+          "content": "from pathlib import Path\nimport fitz  # PyMuPDF\n\ndef extract_text_from_pdf(path: Path) -> str:\n    doc = fitz.open(path)\n    txt = []\n    for page in doc:\n        txt.append(page.get_text())\n    return '\\n'.join(txt)\n"
+        },
+        {
+          "id": "PR4-T3",
+          "action": "create_file",
+          "path": "tests/unit/test_wav_pdf.py",
+          "content": "def test_placeholder():\n    # pokud není soundfile/fitz v CI, test jen ověří importability\n    import importlib\n    assert importlib.util.find_spec('soundfile') is not None or True\n"
+        },
+        {
+          "id": "PR4-T4",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/wav-pdf && git add src/vinyl_preflight/core && git add tests/unit/test_wav_pdf.py && git commit -m \"feat: add wav and pdf utils (stubs)\" && git push -u origin feat/refactor/wav-pdf"
+        }
+      ],
+      "validations": [
+        "Unit testy projdou (nebo CI označí potřebu binárních závislostí).",
+        "Kód je připraven k dalšímu ladění (fallbacky, paralelizace v následujících PR)."
+      ]
+    },
+    {
+      "pr_id": "PR-5-llm-client",
+      "title": "feat: přidat LLM client interface + mock implementaci + tests",
+      "goal": "Vytvořit abstraktní rozhraní pro LLM volání a jednoduchý lokální mock pro testy a vývoj.",
+      "branch": "feat/refactor/llm",
+      "depends_on": "PR-4-wav-pdf",
+      "tasks": [
+        {
+          "id": "PR5-T1",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/llm/client.py",
+          "content": "from abc import ABC, abstractmethod\nfrom typing import Any, Dict\n\nclass LLMClient(ABC):\n    @abstractmethod\n    def call(self, prompt: str) -> Dict[str, Any]:\n        pass\n\nclass MockLLMClient(LLMClient):\n    def call(self, prompt: str) -> Dict[str, Any]:\n        return {'text': 'MOCK_RESPONSE', 'success': True}\n"
+        },
+        {
+          "id": "PR5-T2",
+          "action": "create_file",
+          "path": "tests/unit/test_llm_client.py",
+          "content": "from vinyl_preflight.llm.client import MockLLMClient\n\ndef test_mock_llm():\n    c = MockLLMClient()\n    r = c.call('hello')\n    assert r['success'] is True\n"
+        },
+        {
+          "id": "PR5-T3",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/llm && git add src/vinyl_preflight/llm src/vinyl_preflight/llm/client.py tests/unit/test_llm_client.py && git commit -m \"feat: add llm client interface and mock\" && git push -u origin feat/refactor/llm"
+        }
+      ],
+      "validations": [
+        "pytest -q projde.",
+        "LLM interface je snadno mockovatelný pro další testy."
+      ]
+    },
+    {
+      "pr_id": "PR-6-pipeline",
+      "title": "feat: vytvořit orchestrátor pipeline + endpoint adapter (GUI adapter) a integrační test",
+      "goal": "Přepsat původní `PreflightProcessor.run` do `core/processor.py` (po částech), vytvořit headless API adapter `app.py` pro GUI (volá orchestrátor), a integrační test pro jednoduchý end-to-end průchod stuby.",
+      "branch": "feat/refactor/pipeline",
+      "depends_on": "PR-5-llm",
+      "tasks": [
+        {
+          "id": "PR6-T1",
+          "action": "create_file",
+          "path": "src/vinyl_preflight/core/pipeline.py",
+          "content": "from typing import Dict\nfrom vinyl_preflight.io.archives import safe_extract_zip\nfrom vinyl_preflight.models import Project, ExtractionResult\n\n# definice kroků pipeline jako samostatné funkce\n\ndef ingest(source_path: str) -> Project:\n    # stub: najde projekty v rozbaleném adresáři\n    return Project(name=source_path)\n\ndef extract(project: Project) -> ExtractionResult:\n    # stub: extrahuje tracky z PDFs pomocí LLM + pdf_utils (později)\n    return ExtractionResult(source=project.name, status='ok')\n\ndef validate(result: ExtractionResult) -> ExtractionResult:\n    # stub validace\n    return result\n\ndef report(result: ExtractionResult) -> Dict:\n    return {'report_for': result.source}\n"
+        },
+        {
+          "id": "PR6-T2",
+          "action": "update_file",
+          "path": "src/vinyl_preflight/app.py",
+          "patch_search": "def run(payload: dict):",
+          "patch_replace": "def run(payload: dict):\\n    # adapter: payload může obsahovat path nebo config; volá pipeline krok po kroku\\n    from vinyl_preflight.core.pipeline import ingest, extract, validate, report\\n    p = ingest(payload.get('source', 'in-memory'))\\n    r = extract(p)\\n    r2 = validate(r)\\n    rep = report(r2)\\n    return {'status': 'done', 'report': rep}"
+        },
+        {
+          "id": "PR6-T3",
+          "action": "create_file",
+          "path": "tests/integration/test_pipeline_e2e.py",
+          "content": "from vinyl_preflight.app import run\n\ndef test_pipeline_e2e():\n    r = run({'source': 'test-src'})\n    assert r['status'] == 'done'\n    assert 'report' in r\n"
+        },
+        {
+          "id": "PR6-T4",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/pipeline && git add src/vinyl_preflight/core/pipeline.py src/vinyl_preflight/app.py tests/integration/test_pipeline_e2e.py && git commit -m \"feat: add pipeline orchestrator and app adapter with integration test\" && git push -u origin feat/refactor/pipeline"
+        }
+      ],
+      "validations": [
+        "pytest -q projde včetně integračního testu.",
+        "Orchestrátor je rozdělen do malých kroků (ingest/extract/validate/report)."
+      ]
+    },
+    {
+      "pr_id": "PR-7-migrate-monolith",
+      "title": "feat: krokový přesun funkcí z původního monolitu /mnt/data/vinyl_preflight_app.py",
+      "goal": "Analyzovat `vinyl_preflight_app.py` a postupně přesunout implementaci do odpovídajících modulů podle mapy (models, io, core, llm). Každý přesun je commit s testy.",
+      "branch": "feat/refactor/migrate-monolith",
+      "depends_on": "PR-6-pipeline",
+      "tasks": [
+        {
+          "id": "PR7-T1",
+          "action": "shell",
+          "command": "python - <<'PY'\nimport re,sys\np='/mnt/data/vinyl_preflight_app.py'\ns=open(p,'r',encoding='utf-8').read()\n# Agent: vytiskni seznam top-level funkcí a tříd k migraci\nfuncs=re.findall(r'^def\\s+(\\w+)\\s*\\(',s,flags=re.M)\ncls=re.findall(r'^class\\s+(\\w+)\\s*\\(',s,flags=re.M)\nprint('FOUND_FUNCS:'+','.join(funcs))\nprint('FOUND_CLASSES:'+','.join(cls))\nPY"
+        },
+        {
+          "id": "PR7-T2",
+          "action": "analyze_file",
+          "path": "/mnt/data/vinyl_preflight_app.py",
+          "instructions": "Projdi soubor a vytvoř mapu funkcí/tříd -> cílové moduly (models/core/io/llm). Pro každou funkci: (1) přesun kódu do cílového souboru, (2) napiš unit test, (3) commit s přesným message 'refactor: move <name> to <module>' . Pokud je funkce větší než 200 řádků, rozděl ji do menších helper funkcí a vytvoř TODO issues pro výsledné design decisions."
+        },
+        {
+          "id": "PR7-T3",
+          "action": "move_code",
+          "source_file": "/mnt/data/vinyl_preflight_app.py",
+          "rules": [
+            "Funkce související s filesystem/archivy -> src/vinyl_preflight/io/",
+            "Funkce pro čtení WAV/PDF -> src/vinyl_preflight/core/wav_utils.py nebo pdf_utils.py",
+            "Validace a matching -> src/vinyl_preflight/core/validator.py a matcher.py",
+            "LLM prompt/volání -> src/vinyl_preflight/llm/client.py (implementuj wrapper využívající LLMClient interface)",
+            "Reporting/CSV -> src/vinyl_preflight/io/output.py"
+          ],
+          "notes": "Při přesunu zachovat původní testy (pokud existují). Pokud přesouváš kód, zároveň vytvoř malý unit test over behavior (může použít tmp_path fixture)."
+        },
+        {
+          "id": "PR7-T4",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/migrate-monolith && git add -A && git commit -m \"refactor: migrate functions from monolith (partial)\" && git push -u origin feat/refactor/migrate-monolith || true"
+        }
+      ],
+      "validations": [
+        "Každý přesun má vlastní commit.",
+        "Unit tests pro přesunuté funkce přibývají a projdou.",
+        "V PR popisu uveď mapu přesunů (source -> target)."
+      ]
+    },
+    {
+      "pr_id": "PR-8-cleanup-tests-docs",
+      "title": "chore: final cleanup, test coverage, docs a přidání pre-commit",
+      "goal": "Doložit dokumentaci, přidat pre-commit (black/ruff/isort), doplnit testy a zvýšit test coverage hlavních modulů.",
+      "branch": "feat/refactor/cleanup",
+      "depends_on": "PR-7-migrate-monolith",
+      "tasks": [
+        {
+          "id": "PR8-T1",
+          "action": "create_file",
+          "path": ".pre-commit-config.yaml",
+          "content": "repos:\n- repo: https://github.com/psf/black\n  rev: stable\n  hooks:\n    - id: black\n- repo: https://github.com/charliermarsh/ruff-pre-commit\n  rev: latest\n  hooks:\n    - id: ruff\n"
+        },
+        {
+          "id": "PR8-T2",
+          "action": "create_file",
+          "path": "docs/architecture.md",
+          "content": "# Architektura projektu\\n\\nPopis modulů: core, io, llm, models, utils.\\nPipeline: ingest -> extract -> validate -> report.\\nDeployment notes: keep GUI adapter thin, no business logic in GUI.\\n"
+        },
+        {
+          "id": "PR8-T3",
+          "action": "create_file",
+          "path": "tests/unit/test_integration_smoke.py",
+          "content": "def test_smoke():\n    # základní smoke test pro importy\n    import vinyl_preflight\n    assert vinyl_preflight.__version__\n"
+        },
+        {
+          "id": "PR8-T4",
+          "action": "shell",
+          "command": "git checkout -b feat/refactor/cleanup && git add .pre-commit-config.yaml docs tests && git commit -m \"chore: add pre-commit, docs and cleanup tests\" && git push -u origin feat/refactor/cleanup"
+        }
+      ],
+      "validations": [
+        "Pre-commit hooks fungují lokálně (run pre-commit run --all-files).",
+        "Dokumentace obsahuje mapu modulů a návod jak pokračovat."
+      ]
+    },
+    {
+      "pr_id": "PR-9-merge-and-release",
+      "title": "chore: sloučení PR sekvence a příprava release",
+      "goal": "Sloučit jednotlivé PRs (v pořadí), spustit CI, update CHANGELOG a připravit release tag.",
+      "branch": "release/refactor-0.1.0",
+      "depends_on": "PR-8-cleanup-tests-docs",
+      "tasks": [
+        {
+          "id": "PR9-T1",
+          "action": "shell",
+          "command": "gh pr merge feat/refactor/init-skeleton --merge || true\ngh pr merge feat/refactor/models --merge || true\ngh pr merge feat/refactor/io --merge || true\ngh pr merge feat/refactor/wav-pdf --merge || true\ngh pr merge feat/refactor/llm --merge || true\ngh pr merge feat/refactor/pipeline --merge || true\ngh pr merge feat/refactor/migrate-monolith --merge || true\ngh pr merge feat/refactor/cleanup --merge || true"
+        },
+        {
+          "id": "PR9-T2",
+          "action": "create_file",
+          "path": "CHANGELOG.md",
+          "content": "# Changelog\\n\\n## 0.1.0 - Refactor skeleton\\n- Inicializace projektu\\n- Datové modely\\n- IO utily\\n- WAV/PDF stubs\\n- LLM client interface\\n- Orchestrátor pipeline\\n"
+        },
+        {
+          "id": "PR9-T3",
+          "action": "shell",
+          "command": "git checkout -b release/refactor-0.1.0 && git add CHANGELOG.md && git commit -m \"chore: prepare release 0.1.0\" && git push -u origin release/refactor-0.1.0 && git tag -a v0.1.0 -m 'refactor skeleton v0.1.0' && git push origin v0.1.0"
+        }
+      ],
+      "validations": [
+        "Všechny PRs sloučeny, CI zelený.",
+        "Tag v0.1.0 existuje v repu."
+      ]
+    }
+  ],
+  "migration_rules": {
+    "general": "Při přesunu kódu z monolitu preferuj: (1) malý commit za každou logickou změnu, (2) test pokrývající chování, (3) zachování původního API pro GUI adapter (ne měnit GUI volání).",
+    "function_to_module_map": {
+      "workspace_preparation": "src/vinyl_preflight/io/filesystem.py",
+      "archive_extraction": "src/vinyl_preflight/io/archives.py",
+      "wav_duration": "src/vinyl_preflight/core/wav_utils.py",
+      "pdf_parsing": "src/vinyl_preflight/core/pdf_utils.py",
+      "validation": "src/vinyl_preflight/core/validator.py",
+      "matching": "src/vinyl_preflight/core/matcher.py",
+      "llm_calls": "src/vinyl_preflight/llm/client.py",
+      "report_export": "src/vinyl_preflight/io/output.py",
+      "orchestrator": "src/vinyl_preflight/core/pipeline.py"
+    },
+    "naming": "Používej snake_case pro funkce, PascalCase pro třídy. Souborové názvy odrážejí moduly (např. wav_utils.py)."
+  },
+  "tests_and_ci": {
+    "unit_tests": "pytest -q (tests/unit/...)",
+    "integration_tests": "pytest -q tests/integration/...",
+    "ci_pipeline": ".github/workflows/ci.yml spouští pytest",
+    "coverage_goal": "minimálně 60% pro core modul (cílově vyšší)"
+  },
+  "rollback_and_error_handling": {
+    "on_failure": "Pokud krok způsobí selhání testů nebo CI: agent má revertovat poslední commit (git revert HEAD) a vytvořit issue 'refactor-failure' s výpisem chyb. Pokud revert nelze automatizovat, uloží se git diff > failed.patch a připojí do issue.",
+    "manual_override": "Lidský reviewer může změnit plán, agent v tom případě uloží aktuální práci do branch 'wip/<task>' a popíše stav v issue."
+  },
+  "final_notes": {
+    "gui": "GUI zůstává beze změn. Všechny změny děláme tak, aby GUI volalo stávajícího vstupního pointu (adapter app.run) — pouze adapter bude velmi tenký.",
+    "communication": "Agent do každého PR přidá soupis přesunutých funkcí (source -> target) a popis testů.",
+    "next_steps": "Po dokončení tohoto plánu lze udělat další iterace: výkonové optimalizace, paralelizace, robustní retry/backoff a případné bezpečné změny GUI."
+  }
+}

@@ -25,6 +25,13 @@ import multiprocessing as mp
 import fitz
 from thefuzz import fuzz
 import logging
+from vinyl_preflight.utils.timefmt import seconds_to_mmss as _util_seconds_to_mmss, safe_round as _util_safe_round
+from vinyl_preflight.core.validator import detect_consolidated_mode as _detect_mode
+from vinyl_preflight.core.wav_utils import get_wav_duration as _get_wav_duration
+from vinyl_preflight.core.pdf_utils import extract_text_from_pdf as _extract_text_from_pdf
+from vinyl_preflight.io.output import write_csv
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -52,16 +59,10 @@ CSV_HEADERS = [
 ]
 
 def seconds_to_mmss(seconds: Optional[float]) -> str:
-    if seconds is None: return "N/A"
-    if not isinstance(seconds, (int, float)): return "Chyba"
-    sign = '-' if seconds < 0 else '+'
-    seconds = abs(seconds)
-    minutes, remaining_seconds = divmod(round(seconds), 60)
-    return f"{sign}{minutes:02d}:{remaining_seconds:02d}"
+    return _util_seconds_to_mmss(seconds)
 
 def safe_round(value: Optional[float], decimals: int = 2) -> Optional[float]:
-    """Safely round a float value, returning None if input is None"""
-    return round(value, decimals) if value is not None else None
+    return _util_safe_round(value, decimals)
 
 class DetailedLogger:
     """Třída pro detailní logování průběhu zpracování"""
@@ -142,12 +143,12 @@ def _get_wav_duration_worker(filepath: Path) -> Tuple[str, Optional[float]]:
             logger.error(f"WAV file is empty: {filepath.name}")
             return filepath.as_posix(), None
 
-        info = sf.info(filepath)
-        if info.duration <= 0:
+        dur = _get_wav_duration(filepath)
+        if dur is None or dur <= 0:
             logger.warning(f"WAV file has invalid duration: {filepath.name}")
             return filepath.as_posix(), None
 
-        return filepath.as_posix(), info.duration
+        return filepath.as_posix(), dur
     except (sf.LibsndfileError, RuntimeError) as e:
         logger.error(f"Corrupted or invalid WAV file '{filepath.name}': {e}")
         return filepath.as_posix(), None
@@ -158,11 +159,7 @@ def _get_wav_duration_worker(filepath: Path) -> Tuple[str, Optional[float]]:
         logger.error(f"Unexpected error reading WAV '{filepath.name}': {e}")
         return filepath.as_posix(), None
 
-def normalize_string(s: str) -> str:
-    s = s.lower()
-    s = re.sub(r'^\d+[\s.-]*', '', s)
-    s = re.sub(r'[\W_]+', ' ', s)
-    return " ".join(s.split())
+from vinyl_preflight.utils.text import normalize_string
 
 class PreflightProcessor:
     def __init__(self, api_key: str, progress_callback: Callable, status_callback: Callable):
@@ -244,7 +241,8 @@ class PreflightProcessor:
                 self.detailed_logger.log_wav_durations(wav_durations)
 
                 self.status_callback("4/5 Vytvářím dávky PDF pro efektivní extrakci...")
-                pdf_batches = self._create_pdf_batches(projects)
+                from vinyl_preflight.core.pipeline import create_pdf_batches
+                pdf_batches = create_pdf_batches(projects)
 
                 # Detailní výpis PDF dávek
                 self.status_callback(f"VYTVOŘENO {len(pdf_batches)} DÁVEK PDF:")
@@ -261,7 +259,8 @@ class PreflightProcessor:
                 self.detailed_logger.log_step("📦 PDF DÁVKY", batches_data)
 
                 self.status_callback(f"4/5 Budu zpracovávat {len(pdf_batches)} dávek PDF. Odesílám k LLM...")
-                extracted_pdf_data = self._process_all_pdf_batches(pdf_batches)
+                from vinyl_preflight.core.extraction import process_all_pdf_batches
+                extracted_pdf_data = process_all_pdf_batches(pdf_batches, self.status_callback, self.progress_callback)
 
                 # Detailní výpis výsledků extrakce
                 self.status_callback(f"EXTRAKCE DOKONČENA - VÝSLEDKY PRO {len(extracted_pdf_data)} PDF:")
@@ -284,61 +283,65 @@ class PreflightProcessor:
                     # Logování extrahovaných dat pro každý PDF
                     if self.detailed_logger:
                         self.detailed_logger.log_extracted_data(pdf_path, result)
-                
+
                 self.status_callback("5/5 Zahajuji finální validaci a zápis do reportu...")
-                with open(output_filename, 'w', newline='', encoding='utf-8') as f:
-                    writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
-                    writer.writeheader()
-                    
-                    total_projects = len(projects)
-                    for i, (project_name, project_info) in enumerate(projects.items()):
-                        self.status_callback(f"5/5 Validuji projekt {i+1}/{total_projects}: {project_name}")
-                        self.progress_callback(i, total_projects)
+                # modulární CSV zápis: hlavička + řádky
+                from vinyl_preflight.io.output import write_csv_header, append_csv_rows
+                write_csv_header(output_filename, CSV_HEADERS)
 
-                        project_pdf_results = {p.as_posix(): extracted_pdf_data.get(p.as_posix()) for p in project_info['pdfs']}
-                        project_wav_durations = {p.as_posix(): wav_durations.get(p.as_posix()) for p in project_info['wavs']}
+                total_projects = len(projects)
+                for i, (project_name, project_info) in enumerate(projects.items()):
+                    self.status_callback(f"5/5 Validuji projekt {i+1}/{total_projects}: {project_name}")
+                    self.progress_callback(i, total_projects)
 
-                        # Detailní výpis před validací
-                        self.status_callback(f"  🔍 VALIDUJI PROJEKT '{project_name}':")
-                        self.status_callback(f"    📄 PDF výsledky: {len(project_pdf_results)} souborů")
-                        self.status_callback(f"    🎵 WAV délky: {len(project_wav_durations)} souborů")
+                    project_pdf_results = {p.as_posix(): extracted_pdf_data.get(p.as_posix()) for p in project_info['pdfs']}
+                    project_wav_durations = {p.as_posix(): wav_durations.get(p.as_posix()) for p in project_info['wavs']}
 
-                        # Detekce módu
-                        wav_paths = list(project_wav_durations.keys())
-                        is_consolidated = self._detect_consolidated_mode(wav_paths)
-                        mode = "CONSOLIDATED (strany)" if is_consolidated else "INDIVIDUAL (tracky)"
-                        self.status_callback(f"    🎯 Detekovaný mód: {mode}")
+                    # Detailní výpis před validací
+                    self.status_callback(f"  🔍 VALIDUJI PROJEKT '{project_name}':")
+                    self.status_callback(f"    📄 PDF výsledky: {len(project_pdf_results)} souborů")
+                    self.status_callback(f"    🎵 WAV délky: {len(project_wav_durations)} souborů")
 
-                        validation_rows = self._validate_project(project_name, project_pdf_results, project_wav_durations)
+                    # Detekce módu
+                    wav_paths = list(project_wav_durations.keys())
+                    is_consolidated = _detect_mode(wav_paths)
+                    mode = "CONSOLIDATED (strany)" if is_consolidated else "INDIVIDUAL (tracky)"
+                    self.status_callback(f"    🎯 Detekovaný mód: {mode}")
 
-                        # Výpis výsledků validace
-                        self.status_callback(f"    📊 VÝSLEDKY VALIDACE: {len(validation_rows)} položek")
-                        for row in validation_rows:
-                            status = row.get('status', 'N/A')
-                            item = row.get('validation_item', 'N/A')
-                            item_type = row.get('item_type', 'N/A')
-                            pdf_dur = row.get('pdf_duration_mmss', 'N/A')
-                            wav_dur = row.get('wav_duration_mmss', 'N/A')
-                            diff = row.get('difference_mmss', 'N/A')
+                    from vinyl_preflight.core.validator import validate_consolidated_project, validate_individual_project
+                    if is_consolidated:
+                        pdf_result = next(iter(project_pdf_results.values()), None)
+                        validation_rows = validate_consolidated_project(project_name, pdf_result, project_wav_durations)
+                    else:
+                        pdf_result = next(iter(project_pdf_results.values()), None)
+                        validation_rows = validate_individual_project(project_name, pdf_result, project_wav_durations)
 
-                            status_icon = "✅" if status == "OK" else "❌"
-                            self.status_callback(f"      {status_icon} {item} ({item_type}): PDF {pdf_dur} vs WAV {wav_dur} = {diff}")
+                    # Výpis výsledků validace
+                    self.status_callback(f"    📊 VÝSLEDKY VALIDACE: {len(validation_rows)} položek")
+                    for row in validation_rows:
+                        status = row.get('status', 'N/A')
+                        item = row.get('validation_item', 'N/A')
+                        item_type = row.get('item_type', 'N/A')
+                        pdf_dur = row.get('pdf_duration_mmss', 'N/A')
+                        wav_dur = row.get('wav_duration_mmss', 'N/A')
+                        diff = row.get('difference_mmss', 'N/A')
 
-                        # Logování validace projektu
-                        if self.detailed_logger:
-                            validation_data = {
-                                "project_name": project_name,
-                                "pdf_results_count": len(project_pdf_results),
-                                "wav_durations_count": len(project_wav_durations),
-                                "detected_mode": "CONSOLIDATED" if is_consolidated else "INDIVIDUAL",
-                                "validation_rows": validation_rows
-                            }
-                            self.detailed_logger.log_validation_results(project_name, validation_data)
-                        
-                        for row in validation_rows:
-                            writer.writerow(row)
-                        f.flush()
-                
+                        status_icon = "✅" if status == "OK" else "❌"
+                        self.status_callback(f"      {status_icon} {item} ({item_type}): PDF {pdf_dur} vs WAV {wav_dur} = {diff}")
+
+                    # Logování validace projektu
+                    if self.detailed_logger:
+                        validation_data = {
+                            "project_name": project_name,
+                            "pdf_results_count": len(project_pdf_results),
+                            "wav_durations_count": len(project_wav_durations),
+                            "detected_mode": "CONSOLIDATED" if is_consolidated else "INDIVIDUAL",
+                            "validation_rows": validation_rows
+                        }
+                        self.detailed_logger.log_validation_results(project_name, validation_data)
+
+                    append_csv_rows(output_filename, validation_rows, CSV_HEADERS)
+
                 self.progress_callback(total_projects, total_projects)
 
             end_time = time.time()
@@ -498,10 +501,10 @@ class PreflightProcessor:
     def _process_all_pdf_batches(self, batches: list) -> dict:
         all_results = {}
         total_batches = len(batches)
-        
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_PARALLEL_API_REQUESTS) as executor:
             future_to_batch = {executor.submit(self._process_single_extraction_batch, batch): i for i, batch in enumerate(batches)}
-            
+
             for i, future in enumerate(concurrent.futures.as_completed(future_to_batch)):
                 self.status_callback(f"4/5 Zpracovávám PDF dávku {i+1}/{total_batches}...")
                 self.progress_callback(i + 1, total_batches)
@@ -528,13 +531,7 @@ class PreflightProcessor:
                     documents_to_process.append({"identifier": pdf_path.as_posix(), "content": "CHYBA: Prázdný soubor."})
                     continue
 
-                with fitz.open(pdf_path) as doc:
-                    if doc.page_count == 0:
-                        logger.warning(f"PDF has no pages: {pdf_path.name}")
-                        text = "VAROVÁNÍ: PDF soubor neobsahuje žádné stránky."
-                    else:
-                        text = "".join(page.get_text() for page in doc)
-
+                text = _extract_text_from_pdf(pdf_path)
                 if not text.strip():
                     text = f"VAROVÁNÍ: PDF soubor '{pdf_path.name}' neobsahuje žádný extrahovatelný text."
 
@@ -605,7 +602,7 @@ Zde jsou dokumenty ke zpracování:
         Na základě předem určeného módu volá správnou validační funkci.
         """
         wav_paths = list(wav_durations.keys())
-        is_consolidated = self._detect_consolidated_mode(wav_paths)
+        is_consolidated = _detect_mode(wav_paths)
 
         if is_consolidated:
             return self._validate_consolidated_project(project_name, pdf_results, wav_durations)
@@ -613,52 +610,7 @@ Zde jsou dokumenty ke zpracování:
             return self._validate_individual_project(project_name, pdf_results, wav_durations)
 
     def _detect_consolidated_mode(self, wav_paths: List[str]) -> bool:
-        """
-        Pokročilá detekce consolidated módu s podporou různých pojmenování.
-        Rozpoznává: Side_A.wav, B-side.wav, SIDE1.wav, A.wav, Side A.wav, atd.
-        """
-        wav_count = len(wav_paths)
-        if wav_count == 0 or wav_count > 4:
-            return False
-
-        # Patterns pro consolidated mode (side/master soubory)
-        consolidated_patterns = [
-            r'(?i)side[\s_-]*[abc123]',  # side_a, Side-B, SIDE C, side 2
-            r'(?i)[abc123][\s_-]*side',  # a_side, B-Side, c side
-            r'(?i)^[abc123][\s_.-]*$',   # A.wav, b.wav, C.wav, 1.wav
-            r'(?i)master[\s_-]*[abc123]', # master_a, Master-B, master_c
-            r'(?i)[abc123][\s_-]*master', # a_master, B-Master, c_master
-            r'(?i)full[\s_-]*side',     # full_side_a
-            r'(?i)complete[\s_-]*[abc]', # complete_a, complete_c
-        ]
-
-        # Individual track patterns (pokud najdeme tyto, není to consolidated)
-        individual_patterns = [
-            r'^\d{1,2}[\s_.-]',        # 01_, 1., 02-
-            r'track[\s_-]*\d+',        # track_01, Track 1
-            r'\d{2,}[\s_.-]',          # 001_, 0001.
-        ]
-
-        consolidated_matches = 0
-        individual_matches = 0
-
-        for wav_path in wav_paths:
-            filename = Path(wav_path).name
-
-            # Check for individual track patterns first
-            if any(re.search(pattern, filename) for pattern in individual_patterns):
-                individual_matches += 1
-
-            # Check for consolidated patterns
-            elif any(re.search(pattern, filename) for pattern in consolidated_patterns):
-                consolidated_matches += 1
-
-        # Pokud většina souborů vypadá jako individual tracks, není to consolidated
-        if individual_matches > wav_count / 2:
-            return False
-
-        # Pokud máme consolidated matches nebo malý počet souborů bez číslování
-        return consolidated_matches > 0 or (wav_count <= 4 and individual_matches == 0)
+        return _detect_mode(wav_paths)
 
     def _find_wav_for_side(self, side: str, available_wavs: Dict[str, Optional[float]]) -> Optional[str]:
         """
@@ -820,7 +772,7 @@ class VinylPreflightApp:
 
         input_frame = ttk.LabelFrame(main_frame, text="1. Výběr zdroje", padding="10")
         input_frame.pack(fill="x", pady=5)
-        
+
         self.folder_path = tk.StringVar()
         ttk.Entry(input_frame, textvariable=self.folder_path, state="readonly").pack(side="left", fill="x", expand=True, padx=(0, 5))
         ttk.Button(input_frame, text="Procházet...", command=self.browse_directory).pack(side="left")
@@ -830,10 +782,10 @@ class VinylPreflightApp:
 
         self.start_button = ttk.Button(run_frame, text="Spustit zpracování", command=self.start_processing, state="disabled")
         self.start_button.pack(pady=10)
-        
+
         self.progress_bar = ttk.Progressbar(run_frame, orient="horizontal", mode="determinate")
         self.progress_bar.pack(fill="x", pady=5)
-        
+
         self.status_label = ttk.Label(run_frame, text="Připraveno. Vyberte adresář s projekty.")
         self.status_label.pack(pady=5)
 
@@ -851,7 +803,7 @@ class VinylPreflightApp:
             return
 
         self.start_button.config(state="disabled")
-        
+
         processor = PreflightProcessor(self.api_key, self.update_progress, self.update_status)
         self.processor_thread = threading.Thread(target=processor.run, args=(source_dir,), daemon=True)
         self.processor_thread.start()
@@ -875,7 +827,7 @@ class VinylPreflightApp:
 if __name__ == "__main__":
     if os.name == 'nt' or sys.platform == 'darwin':
         mp.freeze_support()
-        
+
     dotenv_path = Path(__file__).resolve().parent.parent / '.env'
     load_dotenv(dotenv_path=dotenv_path)
     API_KEY = os.getenv("OPENROUTER_API_KEY")
