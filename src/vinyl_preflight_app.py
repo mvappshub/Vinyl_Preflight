@@ -16,14 +16,14 @@ from typing import Callable, Dict, List, Tuple, Optional
 import shutil
 import tempfile
 import zipfile
-import re
+
 
 import requests
 import soundfile as sf
 from dotenv import load_dotenv
 import multiprocessing as mp
 import fitz
-from thefuzz import fuzz
+
 import logging
 from vinyl_preflight.utils.timefmt import seconds_to_mmss as _util_seconds_to_mmss, safe_round as _util_safe_round
 from vinyl_preflight.core.validator import detect_consolidated_mode as _detect_mode
@@ -596,166 +596,11 @@ Zde jsou dokumenty ke zpracování:
             logger.error(f"Chyba API volání pro dávku: {e}")
             return [{"source_identifier": d["identifier"], "status": "error", "data": [], "error_message": str(e)} for d in documents_to_process]
 
-    def _validate_project(self, project_name: str, pdf_results: Dict[str, Dict], wav_durations: Dict[str, Optional[float]]) -> List[Dict]:
-        """
-        Hlavní validační metoda, která funguje jako "dispečer".
-        Na základě předem určeného módu volá správnou validační funkci.
-        """
-        wav_paths = list(wav_durations.keys())
-        is_consolidated = _detect_mode(wav_paths)
 
-        if is_consolidated:
-            return self._validate_consolidated_project(project_name, pdf_results, wav_durations)
-        else:
-            return self._validate_individual_project(project_name, pdf_results, wav_durations)
 
-    def _detect_consolidated_mode(self, wav_paths: List[str]) -> bool:
-        return _detect_mode(wav_paths)
 
-    def _find_wav_for_side(self, side: str, available_wavs: Dict[str, Optional[float]]) -> Optional[str]:
-        """
-        Pokročilé hledání WAV souboru pro danou stranu.
-        Podporuje různé formáty pojmenování: SIDE A, Side_A, side-a, A, atd.
-        """
-        side_lower = side.lower()
 
-        # Různé patterns pro hledání WAV souboru pro stranu
-        patterns = [
-            f"side {side_lower}",           # "side a", "side b", "side c"
-            f"side_{side_lower}",           # "side_a", "side_b", "side_c"
-            f"side-{side_lower}",           # "side-a", "side-b", "side-c"
-            f"side{side_lower}",            # "sidea", "sideb", "sidec"
-            f"{side_lower} side",           # "a side", "b side", "c side"
-            f"{side_lower}_side",           # "a_side", "b_side", "c_side"
-            f"{side_lower}-side",           # "a-side", "b-side", "c-side"
-            f"{side_lower}side",            # "aside", "bside", "cside"
-            f"^{side_lower}[._-]",          # "a.", "b_", "c-" na začátku
-            f"[._-]{side_lower}[._-]",      # "_a_", ".b.", "-c-" uprostřed
-            f"[._-]{side_lower}$",          # "_a", ".b", "-c" na konci
-        ]
 
-        # Hledáme první WAV soubor, který odpovídá některému z patterns
-        for wav_path in available_wavs:
-            filename_lower = Path(wav_path).name.lower()
-
-            # Přímé hledání v názvu souboru
-            for pattern in patterns:
-                if pattern.startswith('^') or pattern.endswith('$') or '[' in pattern:
-                    # Regex pattern
-                    if re.search(pattern, filename_lower):
-                        return wav_path
-                else:
-                    # Jednoduchý substring
-                    if pattern in filename_lower:
-                        return wav_path
-
-        return None
-
-    def _validate_consolidated_project(self, project_name: str, pdf_results: Dict[str, Dict], wav_durations: Dict[str, Optional[float]]) -> List[Dict]:
-        """Zpracovává POUZE projekty v konsolidovaném módu."""
-        rows = []
-        pdf_result = next(iter(pdf_results.values()), None)
-        if not pdf_result or pdf_result.get('status') != 'success':
-            pdf_path_str = next(iter(pdf_results.keys()))
-            rows.append({"project_title": project_name, "status": "FAIL", "pdf_source": Path(pdf_path_str).name, "notes": f"Extrakce dat z PDF selhala: {pdf_result.get('error_message', 'Neznámá chyba')}"})
-            return rows
-
-        pdf_tracks = pdf_result.get('data', [])
-        pdf_path_str = pdf_result.get('source_identifier')
-
-        sides = {}
-        for track in pdf_tracks:
-            side = str(track.get('side', 'N/A')).upper()
-            if side not in sides: sides[side] = []
-            sides[side].append(track)
-
-        available_wavs = wav_durations.copy()
-
-        for side, tracks_on_side in sides.items():
-            pdf_total_duration = sum(t.get('duration_seconds', 0) for t in tracks_on_side if t.get('duration_seconds') is not None)
-
-            # Pokročilé hledání WAV souboru pro stranu
-            wav_path_for_side = self._find_wav_for_side(side, available_wavs)
-            if not wav_path_for_side:
-                wav_path_for_side = next((p for p in available_wavs if "master" in Path(p).name.lower()), None)
-
-            wav_dur = available_wavs.pop(wav_path_for_side, None) if wav_path_for_side else None
-
-            diff = wav_dur - pdf_total_duration if wav_dur is not None else None
-            status = "OK"
-            notes = f"Celkem {len(tracks_on_side)} skladeb."
-            if diff is not None and abs(diff) > VALIDATION_TOLERANCE_SECONDS:
-                status = "ERROR"
-                notes += f" Rozdíl překročil toleranci {VALIDATION_TOLERANCE_SECONDS}s."
-            elif wav_dur is None:
-                status = "FAIL"
-                notes = "Nepodařilo se najít odpovídající WAV pro stranu."
-
-            rows.append({
-                "project_title": project_name, "status": status, "validation_item": f"Side {side}",
-                "item_type": "SIDE", "pdf_duration_mmss": seconds_to_mmss(pdf_total_duration).replace('+', ''),
-                "wav_duration_mmss": seconds_to_mmss(wav_dur).replace('+', ''), "difference_mmss": seconds_to_mmss(diff),
-                "pdf_duration_sec": safe_round(pdf_total_duration),
-                "wav_duration_sec": safe_round(wav_dur),
-                "difference_sec": safe_round(diff),
-                "pdf_source": Path(pdf_path_str).name,
-                "wav_source": Path(wav_path_for_side).name if wav_path_for_side else "N/A",
-                "notes": notes
-            })
-        return rows
-
-    def _validate_individual_project(self, project_name: str, pdf_results: Dict[str, Dict], wav_durations: Dict[str, Optional[float]]) -> List[Dict]:
-        """Zpracovává POUZE projekty v individuálním módu."""
-        rows = []
-        pdf_result = next(iter(pdf_results.values()), None)
-        if not pdf_result or pdf_result.get('status') != 'success':
-            pdf_path_str = next(iter(pdf_results.keys()))
-            rows.append({"project_title": project_name, "status": "FAIL", "pdf_source": Path(pdf_path_str).name, "notes": f"Extrakce dat z PDF selhala: {pdf_result.get('error_message', 'Neznámá chyba')}"})
-            return rows
-
-        pdf_tracks = pdf_result.get('data', [])
-        pdf_path_str = pdf_result.get('source_identifier')
-
-        available_wavs = {k: v for k, v in wav_durations.items() if v is not None}
-        for track in pdf_tracks:
-            pdf_dur = track.get('duration_seconds')
-            track_title = track.get('title', '')
-
-            best_match_wav, highest_score = None, 0
-            for wav_path, wav_dur in available_wavs.items():
-                score = fuzz.token_set_ratio(normalize_string(track_title), normalize_string(Path(wav_path).stem))
-                if score > highest_score:
-                    highest_score, best_match_wav = score, wav_path
-
-            wav_path_str, wav_dur, notes = None, None, ""
-            if highest_score > 70:
-                wav_path_str, wav_dur = best_match_wav, available_wavs.pop(best_match_wav)
-            else:
-                notes = "Nepodařilo se spárovat WAV soubor podle názvu."
-
-            diff = wav_dur - pdf_dur if wav_dur is not None and pdf_dur is not None else None
-            status = "OK"
-            if diff is not None and abs(diff) > VALIDATION_TOLERANCE_SECONDS:
-                status, notes = "ERROR", f"Rozdíl překročil toleranci {VALIDATION_TOLERANCE_SECONDS}s"
-            elif wav_path_str is None:
-                status = "FAIL"
-
-            rows.append({
-                "project_title": project_name, "status": status, "validation_item": track_title,
-                "item_type": "TRACK", "pdf_duration_mmss": seconds_to_mmss(pdf_dur).replace('+', ''),
-                "wav_duration_mmss": seconds_to_mmss(wav_dur).replace('+', ''), "difference_mmss": seconds_to_mmss(diff),
-                "pdf_duration_sec": safe_round(pdf_dur),
-                "wav_duration_sec": safe_round(wav_dur),
-                "difference_sec": safe_round(diff),
-                "pdf_source": Path(pdf_path_str).name,
-                "wav_source": Path(wav_path_str).name if wav_path_str else "N/A",
-                "notes": notes
-            })
-
-        for wav_path_str, wav_dur in available_wavs.items():
-            rows.append({"project_title": project_name, "status": "WARN", "wav_source": Path(wav_path_str).name, "notes": "Tento WAV soubor nebyl spárován s žádnou skladbou z PDF."})
-
-        return rows
 
 # Grafické uživatelské rozhraní
 class VinylPreflightApp:
