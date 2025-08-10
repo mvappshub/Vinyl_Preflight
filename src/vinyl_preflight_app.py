@@ -157,11 +157,7 @@ def _get_wav_duration_worker(filepath: Path) -> Tuple[str, Optional[float]]:
         logger.error(f"Unexpected error reading WAV '{filepath.name}': {e}")
         return filepath.as_posix(), None
 
-def normalize_string(s: str) -> str:
-    s = s.lower()
-    s = re.sub(r'^\d+[\s.-]*', '', s)
-    s = re.sub(r'[\W_]+', ' ', s)
-    return " ".join(s.split())
+from vinyl_preflight.utils.text import normalize_string
 
 class PreflightProcessor:
     def __init__(self, api_key: str, progress_callback: Callable, status_callback: Callable):
