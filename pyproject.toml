@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "vinyl-preflight"
+version = "0.1.0"
+description = "Vinyl Preflight - refactor"
+authors = ["auto-agent <agent@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0.0"
+mypy = "^1.0"
+ruff = "^0.0.0"
+black = "^23.0.0"
+

@@ -1,2 +1,11 @@
 pytest>=7.0.0
 pytest-cov>=4.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+soundfile>=0.12.1
+PyMuPDF>=1.24.1
+python-Levenshtein>=0.21.0
+rapidfuzz>=3.0.0
+thefuzz[speedup]>=0.22.1
+
+pydantic>=2.5.0
