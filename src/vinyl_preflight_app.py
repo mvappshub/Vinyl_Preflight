@@ -283,59 +283,56 @@ class PreflightProcessor:
                         self.detailed_logger.log_extracted_data(pdf_path, result)
 
                 self.status_callback("5/5 Zahajuji finální validaci a zápis do reportu...")
-                # využijeme modulární CSV writer
-                with open(output_filename, 'w', newline='', encoding='utf-8') as f:
-                    writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
-                    writer.writeheader()
+                # modulární CSV zápis: hlavička + řádky
+                from vinyl_preflight.io.output import write_csv_header, append_csv_rows
+                write_csv_header(output_filename, CSV_HEADERS)
 
-                    total_projects = len(projects)
-                    for i, (project_name, project_info) in enumerate(projects.items()):
-                        self.status_callback(f"5/5 Validuji projekt {i+1}/{total_projects}: {project_name}")
-                        self.progress_callback(i, total_projects)
+                total_projects = len(projects)
+                for i, (project_name, project_info) in enumerate(projects.items()):
+                    self.status_callback(f"5/5 Validuji projekt {i+1}/{total_projects}: {project_name}")
+                    self.progress_callback(i, total_projects)
 
-                        project_pdf_results = {p.as_posix(): extracted_pdf_data.get(p.as_posix()) for p in project_info['pdfs']}
-                        project_wav_durations = {p.as_posix(): wav_durations.get(p.as_posix()) for p in project_info['wavs']}
+                    project_pdf_results = {p.as_posix(): extracted_pdf_data.get(p.as_posix()) for p in project_info['pdfs']}
+                    project_wav_durations = {p.as_posix(): wav_durations.get(p.as_posix()) for p in project_info['wavs']}
 
-                        # Detailní výpis před validací
-                        self.status_callback(f"  🔍 VALIDUJI PROJEKT '{project_name}':")
-                        self.status_callback(f"    📄 PDF výsledky: {len(project_pdf_results)} souborů")
-                        self.status_callback(f"    🎵 WAV délky: {len(project_wav_durations)} souborů")
+                    # Detailní výpis před validací
+                    self.status_callback(f"  🔍 VALIDUJI PROJEKT '{project_name}':")
+                    self.status_callback(f"    📄 PDF výsledky: {len(project_pdf_results)} souborů")
+                    self.status_callback(f"    🎵 WAV délky: {len(project_wav_durations)} souborů")
 
-                        # Detekce módu
-                        wav_paths = list(project_wav_durations.keys())
-                        is_consolidated = self._detect_consolidated_mode(wav_paths)
-                        mode = "CONSOLIDATED (strany)" if is_consolidated else "INDIVIDUAL (tracky)"
-                        self.status_callback(f"    🎯 Detekovaný mód: {mode}")
+                    # Detekce módu
+                    wav_paths = list(project_wav_durations.keys())
+                    is_consolidated = self._detect_consolidated_mode(wav_paths)
+                    mode = "CONSOLIDATED (strany)" if is_consolidated else "INDIVIDUAL (tracky)"
+                    self.status_callback(f"    🎯 Detekovaný mód: {mode}")
 
-                        validation_rows = self._validate_project(project_name, project_pdf_results, project_wav_durations)
+                    validation_rows = self._validate_project(project_name, project_pdf_results, project_wav_durations)
 
-                        # Výpis výsledků validace
-                        self.status_callback(f"    📊 VÝSLEDKY VALIDACE: {len(validation_rows)} položek")
-                        for row in validation_rows:
-                            status = row.get('status', 'N/A')
-                            item = row.get('validation_item', 'N/A')
-                            item_type = row.get('item_type', 'N/A')
-                            pdf_dur = row.get('pdf_duration_mmss', 'N/A')
-                            wav_dur = row.get('wav_duration_mmss', 'N/A')
-                            diff = row.get('difference_mmss', 'N/A')
+                    # Výpis výsledků validace
+                    self.status_callback(f"    📊 VÝSLEDKY VALIDACE: {len(validation_rows)} položek")
+                    for row in validation_rows:
+                        status = row.get('status', 'N/A')
+                        item = row.get('validation_item', 'N/A')
+                        item_type = row.get('item_type', 'N/A')
+                        pdf_dur = row.get('pdf_duration_mmss', 'N/A')
+                        wav_dur = row.get('wav_duration_mmss', 'N/A')
+                        diff = row.get('difference_mmss', 'N/A')
 
-                            status_icon = "✅" if status == "OK" else "❌"
-                            self.status_callback(f"      {status_icon} {item} ({item_type}): PDF {pdf_dur} vs WAV {wav_dur} = {diff}")
+                        status_icon = "✅" if status == "OK" else "❌"
+                        self.status_callback(f"      {status_icon} {item} ({item_type}): PDF {pdf_dur} vs WAV {wav_dur} = {diff}")
 
-                        # Logování validace projektu
-                        if self.detailed_logger:
-                            validation_data = {
-                                "project_name": project_name,
-                                "pdf_results_count": len(project_pdf_results),
-                                "wav_durations_count": len(project_wav_durations),
-                                "detected_mode": "CONSOLIDATED" if is_consolidated else "INDIVIDUAL",
-                                "validation_rows": validation_rows
-                            }
-                            self.detailed_logger.log_validation_results(project_name, validation_data)
+                    # Logování validace projektu
+                    if self.detailed_logger:
+                        validation_data = {
+                            "project_name": project_name,
+                            "pdf_results_count": len(project_pdf_results),
+                            "wav_durations_count": len(project_wav_durations),
+                            "detected_mode": "CONSOLIDATED" if is_consolidated else "INDIVIDUAL",
+                            "validation_rows": validation_rows
+                        }
+                        self.detailed_logger.log_validation_results(project_name, validation_data)
 
-                        for row in validation_rows:
-                            writer.writerow(row)
-                        f.flush()
+                    append_csv_rows(output_filename, validation_rows, CSV_HEADERS)
 
                 self.progress_callback(total_projects, total_projects)
 
