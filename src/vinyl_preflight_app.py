@@ -302,11 +302,17 @@ class PreflightProcessor:
 
                     # Detekce módu
                     wav_paths = list(project_wav_durations.keys())
-                    is_consolidated = self._detect_consolidated_mode(wav_paths)
+                    is_consolidated = _detect_mode(wav_paths)
                     mode = "CONSOLIDATED (strany)" if is_consolidated else "INDIVIDUAL (tracky)"
                     self.status_callback(f"    🎯 Detekovaný mód: {mode}")
 
-                    validation_rows = self._validate_project(project_name, project_pdf_results, project_wav_durations)
+                    from vinyl_preflight.core.validator import validate_consolidated_project, validate_individual_project
+                    if is_consolidated:
+                        pdf_result = next(iter(project_pdf_results.values()), None)
+                        validation_rows = validate_consolidated_project(project_name, pdf_result, project_wav_durations)
+                    else:
+                        pdf_result = next(iter(project_pdf_results.values()), None)
+                        validation_rows = validate_individual_project(project_name, pdf_result, project_wav_durations)
 
                     # Výpis výsledků validace
                     self.status_callback(f"    📊 VÝSLEDKY VALIDACE: {len(validation_rows)} položek")
