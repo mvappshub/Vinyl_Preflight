@@ -259,7 +259,8 @@ class PreflightProcessor:
                 self.detailed_logger.log_step("📦 PDF DÁVKY", batches_data)
 
                 self.status_callback(f"4/5 Budu zpracovávat {len(pdf_batches)} dávek PDF. Odesílám k LLM...")
-                extracted_pdf_data = self._process_all_pdf_batches(pdf_batches)
+                from vinyl_preflight.core.extraction import process_all_pdf_batches
+                extracted_pdf_data = process_all_pdf_batches(pdf_batches, self.status_callback, self.progress_callback)
 
                 # Detailní výpis výsledků extrakce
                 self.status_callback(f"EXTRAKCE DOKONČENA - VÝSLEDKY PRO {len(extracted_pdf_data)} PDF:")
